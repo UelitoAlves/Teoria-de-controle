@@ -5,22 +5,28 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Desafio PID — Controle Automático</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap');
 
   :root {
-    --bg: #0f1117;
-    --surface: #181c27;
-    --surface2: #1e2335;
-    --border: rgba(255,255,255,0.08);
-    --border2: rgba(255,255,255,0.14);
-    --accent: #4f8ef7;
-    --accent2: #7c5cfc;
-    --green: #2dd4a0;
-    --red: #f7634f;
-    --amber: #f7c94f;
-    --text: #e8eaf0;
-    --muted: #7a7f99;
+    --bg: #ffffff;
+    --surface: #f7f8fa;
+    --surface2: #eef0f4;
+    --border: rgba(0,0,0,0.08);
+    --border2: rgba(0,0,0,0.14);
+    --accent: #1a56db;
+    --accent2: #5521b5;
+    --green: #057a55;
+    --green-bg: #f0fdf4;
+    --green-border: #86efac;
+    --red: #c81e1e;
+    --red-bg: #fff5f5;
+    --red-border: #fca5a5;
+    --amber: #b45309;
+    --amber-bg: #fffbeb;
+    --text: #111827;
+    --muted: #6b7280;
     --mono: 'IBM Plex Mono', monospace;
     --sans: 'IBM Plex Sans', sans-serif;
   }
@@ -35,10 +41,9 @@
     padding: 2rem 1rem;
   }
 
-  .page { max-width: 780px; margin: 0 auto; }
+  .page { max-width: 800px; margin: 0 auto; }
 
-  /* Header */
-  .header { margin-bottom: 2rem; }
+  .header { margin-bottom: 2rem; border-bottom: 1px solid var(--border); padding-bottom: 1.25rem; }
   .header-tag {
     font-family: var(--mono);
     font-size: 11px;
@@ -47,21 +52,14 @@
     text-transform: uppercase;
     margin-bottom: 6px;
   }
-  .header h1 {
-    font-size: 26px;
-    font-weight: 600;
-    letter-spacing: -0.5px;
-    line-height: 1.2;
-    margin-bottom: 6px;
-  }
-  .header p { font-size: 14px; color: var(--muted); font-weight: 300; }
+  .header h1 { font-size: 24px; font-weight: 600; color: var(--text); letter-spacing: -0.4px; margin-bottom: 4px; }
+  .header p { font-size: 14px; color: var(--muted); }
 
-  /* Name block */
   .name-block {
     background: var(--surface);
     border: 1px solid var(--border2);
-    border-radius: 12px;
-    padding: 1.25rem 1.5rem;
+    border-radius: 10px;
+    padding: 1rem 1.25rem;
     margin-bottom: 1.5rem;
     display: flex;
     gap: 10px;
@@ -70,9 +68,9 @@
   .name-block label { font-size: 13px; color: var(--muted); white-space: nowrap; }
   .name-block input {
     flex: 1;
-    background: var(--surface2);
+    background: #fff;
     border: 1px solid var(--border2);
-    border-radius: 8px;
+    border-radius: 7px;
     padding: 8px 12px;
     font-family: var(--sans);
     font-size: 14px;
@@ -80,13 +78,13 @@
     outline: none;
     transition: border-color 0.2s;
   }
-  .name-block input:focus { border-color: var(--accent); }
-  .name-block input:disabled { opacity: 0.5; }
+  .name-block input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(26,86,219,0.08); }
+  .name-block input:disabled { opacity: 0.5; background: var(--surface2); }
   .btn-confirm {
     background: var(--accent);
     color: #fff;
     border: none;
-    border-radius: 8px;
+    border-radius: 7px;
     padding: 8px 18px;
     font-family: var(--sans);
     font-size: 13px;
@@ -95,26 +93,67 @@
     transition: opacity 0.2s;
     white-space: nowrap;
   }
-  .btn-confirm:hover { opacity: 0.85; }
+  .btn-confirm:hover { opacity: 0.88; }
   .btn-confirm:disabled { opacity: 0.4; cursor: default; }
 
-  /* Plant info */
   .plant-box {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-left: 3px solid var(--accent2);
+    background: #f0f4ff;
+    border: 1px solid #c7d7fd;
+    border-left: 4px solid var(--accent);
+    border-radius: 10px;
+    padding: 1rem 1.25rem;
+    margin-bottom: 1rem;
+  }
+  .box-title {
+    font-size: 11px;
+    font-family: var(--mono);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 8px;
+  }
+  .plant-params {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 24px;
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 6px;
+  }
+  .plant-params span { color: var(--text); font-weight: 500; font-family: var(--mono); }
+
+  .ctrl-box {
+    background: #faf5ff;
+    border: 1px solid #ddd6fe;
+    border-left: 4px solid var(--accent2);
     border-radius: 10px;
     padding: 1rem 1.25rem;
     margin-bottom: 1.5rem;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px 24px;
-    align-items: center;
   }
-  .plant-item { font-size: 13px; color: var(--muted); }
-  .plant-item span { font-family: var(--mono); color: var(--text); font-size: 13px; }
+  .ctrl-title {
+    font-size: 11px;
+    font-family: var(--mono);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent2);
+    margin-bottom: 8px;
+  }
 
-  /* Criteria */
+  .eq-wrap {
+    text-align: center;
+    padding: 6px 0;
+    overflow-x: auto;
+  }
+
+  .section-label {
+    font-size: 11px;
+    font-family: var(--mono);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+
   .criteria-row {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -122,16 +161,15 @@
     margin-bottom: 1.5rem;
   }
   .crit-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
+    background: var(--amber-bg);
+    border: 1px solid #fde68a;
     border-radius: 10px;
     padding: 12px 14px;
     text-align: center;
   }
-  .crit-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; letter-spacing: 0.04em; }
-  .crit-val { font-family: var(--mono); font-size: 18px; font-weight: 600; color: var(--amber); }
+  .crit-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .crit-val { font-family: var(--mono); font-size: 17px; font-weight: 600; color: var(--amber); }
 
-  /* Gains */
   .gains-row {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -143,20 +181,14 @@
     border: 1px solid var(--border);
     border-radius: 10px;
     padding: 14px;
-    transition: border-color 0.2s;
+    transition: border-color 0.2s, box-shadow 0.2s;
   }
-  .gain-block:focus-within { border-color: var(--accent); }
-  .gain-name {
-    font-family: var(--mono);
-    font-size: 18px;
-    font-weight: 600;
-    color: var(--accent);
-    margin-bottom: 2px;
-  }
+  .gain-block:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(26,86,219,0.08); }
+  .gain-name { font-family: var(--mono); font-size: 18px; font-weight: 600; color: var(--accent); margin-bottom: 2px; }
   .gain-desc { font-size: 11px; color: var(--muted); margin-bottom: 10px; }
   .gain-block input {
     width: 100%;
-    background: var(--surface2);
+    background: #fff;
     border: 1px solid var(--border2);
     border-radius: 6px;
     padding: 8px 10px;
@@ -169,7 +201,6 @@
   }
   .gain-block input:focus { border-color: var(--accent); }
 
-  /* Attempts bar */
   .att-row {
     display: flex;
     align-items: center;
@@ -177,22 +208,21 @@
     margin-bottom: 1rem;
   }
   .att-label { font-size: 13px; color: var(--muted); }
-  .att-dots { display: flex; gap: 6px; }
+  .att-dots { display: flex; gap: 5px; }
   .dot {
-    width: 12px; height: 12px;
+    width: 11px; height: 11px;
     border-radius: 50%;
-    background: var(--border2);
+    background: var(--surface2);
     border: 1px solid var(--border2);
     transition: background 0.3s;
   }
   .dot.used { background: var(--accent); border-color: var(--accent); }
   .dot.pass { background: var(--green); border-color: var(--green); }
 
-  /* Simulate button */
   .btn-sim {
     width: 100%;
     padding: 13px;
-    background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+    background: var(--accent);
     border: none;
     border-radius: 10px;
     font-family: var(--sans);
@@ -200,15 +230,13 @@
     font-weight: 600;
     color: #fff;
     cursor: pointer;
-    letter-spacing: 0.02em;
     margin-bottom: 1.5rem;
     transition: opacity 0.2s, transform 0.1s;
   }
-  .btn-sim:hover { opacity: 0.9; }
+  .btn-sim:hover { opacity: 0.88; }
   .btn-sim:active { transform: scale(0.99); }
-  .btn-sim:disabled { opacity: 0.35; cursor: default; transform: none; }
+  .btn-sim:disabled { opacity: 0.3; cursor: default; transform: none; }
 
-  /* Chart */
   .chart-wrap {
     background: var(--surface);
     border: 1px solid var(--border);
@@ -219,7 +247,6 @@
     height: 280px;
   }
 
-  /* Metrics */
   .metrics-row {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -233,55 +260,50 @@
     padding: 12px 14px;
     text-align: center;
   }
-  .metric-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; letter-spacing: 0.04em; }
+  .metric-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
   .metric-val { font-family: var(--mono); font-size: 20px; font-weight: 600; }
   .ok  { color: var(--green); }
   .nok { color: var(--red); }
 
-  /* Verdict */
   .verdict {
     border-radius: 10px;
     padding: 12px 16px;
     font-size: 14px;
     font-weight: 500;
-    margin-bottom: 1.25rem;
+    margin-bottom: 1rem;
     display: flex;
     align-items: center;
     gap: 10px;
   }
-  .verdict.pass { background: rgba(45,212,160,0.1); border: 1px solid rgba(45,212,160,0.3); color: var(--green); }
-  .verdict.fail { background: rgba(247,99,79,0.08); border: 1px solid rgba(247,99,79,0.25); color: var(--red); }
-  .verdict.sent { background: rgba(79,142,247,0.1); border: 1px solid rgba(79,142,247,0.3); color: var(--accent); margin-top: 8px; }
+  .verdict.pass { background: var(--green-bg); border: 1px solid var(--green-border); color: var(--green); }
+  .verdict.fail { background: var(--red-bg);   border: 1px solid var(--red-border);   color: var(--red); }
+  .verdict.sent { background: #eff6ff; border: 1px solid #bfdbfe; color: var(--accent); margin-top: 4px; }
 
-  /* History table */
   .hist-title {
     font-family: var(--mono);
-    font-size: 12px;
+    font-size: 11px;
     letter-spacing: 0.08em;
     color: var(--muted);
     text-transform: uppercase;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
     margin-top: 1rem;
   }
   .hist-wrap { overflow-x: auto; }
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 13px;
-  }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
   th {
     font-family: var(--mono);
     font-size: 11px;
-    letter-spacing: 0.06em;
+    letter-spacing: 0.05em;
     color: var(--muted);
     text-align: left;
     padding: 8px 10px;
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid var(--border2);
     font-weight: 400;
     white-space: nowrap;
+    background: var(--surface);
   }
   td {
-    padding: 8px 10px;
+    padding: 7px 10px;
     border-bottom: 1px solid var(--border);
     font-family: var(--mono);
     font-size: 13px;
@@ -289,6 +311,8 @@
     white-space: nowrap;
   }
   tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--surface); }
+  .divider { border: none; border-top: 1px solid var(--border); margin: 1.5rem 0; }
   .locked { opacity: 0.3; pointer-events: none; user-select: none; }
 </style>
 </head>
@@ -298,43 +322,57 @@
   <div class="header">
     <div class="header-tag">Controle Automático — Atividade Avaliativa</div>
     <h1>Desafio PID</h1>
-    <p>Ajuste os ganhos do controlador para atingir todos os critérios de desempenho. Você tem 10 tentativas.</p>
+    <p>Ajuste os ganhos do controlador PID para atingir todos os critérios de desempenho. Você tem <strong>10 tentativas</strong>.</p>
   </div>
 
-  <!-- Nome -->
   <div class="name-block">
-    <label>Seu nome:</label>
-    <input type="text" id="nameInput" placeholder="Nome completo..." autocomplete="off"/>
+    <label>Nome:</label>
+    <input type="text" id="nameInput" placeholder="Digite seu nome completo..." autocomplete="off"/>
     <button class="btn-confirm" id="nameBtn" onclick="saveName()">Confirmar</button>
   </div>
 
   <div id="main" class="locked">
 
-    <!-- Planta -->
     <div class="plant-box">
-      <div class="plant-item">Planta: <span>G(s) = ωₙ² / (s² + 2ζωₙs + ωₙ²)</span></div>
-      <div class="plant-item">ωₙ = <span>3 rad/s</span></div>
-      <div class="plant-item">ζ = <span>0,3</span></div>
-      <div class="plant-item">Entrada: <span>degrau unitário</span></div>
+      <div class="box-title">Planta — G(s)</div>
+      <div class="eq-wrap">
+        \[\displaystyle G(s) = \frac{\omega_n^2}{s^2 + 2\,\zeta\,\omega_n\, s + \omega_n^2}\]
+      </div>
+      <div class="plant-params">
+        <div>Frequência natural:&nbsp;<span>ωₙ = 5 rad/s</span></div>
+        <div>Amortecimento:&nbsp;<span>ζ = 0,2</span></div>
+        <div>Entrada:&nbsp;<span>degrau unitário</span></div>
+      </div>
     </div>
 
-    <!-- Critérios -->
+    <div class="ctrl-box">
+      <div class="ctrl-title">Controlador PID — C(s)</div>
+      <div class="eq-wrap">
+        \[\displaystyle C(s) = K_p + \frac{K_i}{s} + K_d\,s \;=\; \frac{K_d\,s^2 + K_p\,s + K_i}{s}\]
+      </div>
+    </div>
+
+    <hr class="divider"/>
+
+    <div class="section-label">Critérios de desempenho a atingir</div>
     <div class="criteria-row">
       <div class="crit-card">
         <div class="crit-label">Overshoot máximo</div>
-        <div class="crit-val">≤ 10%</div>
+        <div class="crit-val">≤ 8%</div>
       </div>
       <div class="crit-card">
         <div class="crit-label">Tempo de acomodação (±2%)</div>
-        <div class="crit-val">≤ 4,0 s</div>
+        <div class="crit-val">≤ 3,0 s</div>
       </div>
       <div class="crit-card">
         <div class="crit-label">Erro em regime permanente</div>
-        <div class="crit-val">≤ 2%</div>
+        <div class="crit-val">≤ 1%</div>
       </div>
     </div>
 
-    <!-- Ganhos -->
+    <hr class="divider"/>
+
+    <div class="section-label">Ganhos do controlador</div>
     <div class="gains-row">
       <div class="gain-block">
         <div class="gain-name">Kp</div>
@@ -353,31 +391,23 @@
       </div>
     </div>
 
-    <!-- Tentativas -->
     <div class="att-row">
       <span class="att-label">Tentativas usadas:</span>
-      <div class="att-dots" id="dots">
-        <div class="dot" id="d0"></div>
-        <div class="dot" id="d1"></div>
-        <div class="dot" id="d2"></div>
-        <div class="dot" id="d3"></div>
-        <div class="dot" id="d4"></div>
-        <div class="dot" id="d5"></div>
-        <div class="dot" id="d6"></div>
-        <div class="dot" id="d7"></div>
-        <div class="dot" id="d8"></div>
-        <div class="dot" id="d9"></div>
+      <div class="att-dots">
+        <div class="dot" id="d0"></div><div class="dot" id="d1"></div>
+        <div class="dot" id="d2"></div><div class="dot" id="d3"></div>
+        <div class="dot" id="d4"></div><div class="dot" id="d5"></div>
+        <div class="dot" id="d6"></div><div class="dot" id="d7"></div>
+        <div class="dot" id="d8"></div><div class="dot" id="d9"></div>
       </div>
     </div>
 
     <button class="btn-sim" id="simBtn" onclick="simulate()">▶ Simular resposta</button>
 
-    <!-- Gráfico -->
     <div class="chart-wrap">
-      <canvas id="respChart" role="img" aria-label="Gráfico da resposta ao degrau do sistema controlado">Aguardando simulação.</canvas>
+      <canvas id="respChart" role="img" aria-label="Gráfico da resposta ao degrau do sistema controlado por PID">Aguardando simulação.</canvas>
     </div>
 
-    <!-- Métricas -->
     <div class="metrics-row" id="metricsRow" style="display:none">
       <div class="metric-card">
         <div class="metric-label">Overshoot</div>
@@ -396,7 +426,6 @@
     <div id="verdict" style="display:none"></div>
     <div id="sentMsg" style="display:none" class="verdict sent">✓ Resultado enviado para a planilha do professor.</div>
 
-    <!-- Histórico -->
     <div class="hist-title">Histórico de tentativas</div>
     <div class="hist-wrap">
       <table>
@@ -410,25 +439,17 @@
       </table>
     </div>
 
-  </div><!-- /main -->
-</div><!-- /page -->
+  </div>
+</div>
 
 <script>
-// =============================================
-// CONFIGURAÇÃO — altere somente estas linhas
-// =============================================
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz8awdwu7ce2sH4IK1Idg3YkE3H1IjVLqd4nbGx5jRy2lDNIbVrukr5080xw3fFJVTMPw/exec';
-const GOALS = { os: 10, ts: 4.0, er: 2 };
-const PLANT  = { wn: 3, zeta: 0.3 };
-const SIM    = { dt: 0.02, tmax: 15 };
+const APPS_SCRIPT_URL = 'COLE_AQUI_A_URL_DO_APPS_SCRIPT';
+const GOALS   = { os: 8, ts: 3.0, er: 1 };
+const PLANT   = { wn: 5, zeta: 0.2 };
+const SIM     = { dt: 0.01, tmax: 15 };
 const MAX_ATT = 10;
-// =============================================
 
-let studentName = '';
-let attempts = 0;
-let history = [];
-let chart = null;
-let finished = false;
+let studentName = '', attempts = 0, history = [], chart = null, finished = false;
 
 function saveName() {
   const v = document.getElementById('nameInput').value.trim();
@@ -438,6 +459,7 @@ function saveName() {
   document.getElementById('nameInput').disabled = true;
   document.getElementById('nameBtn').disabled = true;
   document.getElementById('main').classList.remove('locked');
+  if (window.MathJax) MathJax.typeset();
 }
 
 function simulate() {
@@ -455,17 +477,16 @@ function simulate() {
   let x1=0, x2=0, intErr=0, prevErr=0;
 
   for (let i = 0; i <= steps; i++) {
-    t.push(parseFloat((i * dt).toFixed(3)));
+    t.push(parseFloat((i * dt).toFixed(4)));
     const err = 1 - x1;
     intErr += err * dt;
     const dErr = (err - prevErr) / dt;
     const u = Kp * err + Ki * intErr + Kd * dErr;
-    const ax1 = x2;
     const ax2 = -2 * zeta * wn * x2 - wn * wn * x1 + wn * wn * u;
-    x1 += ax1 * dt;
+    x1 += x2 * dt;
     x2 += ax2 * dt;
     if (x1 < -10) x1 = -10;
-    if (x1 > 10)  x1 = 10;
+    if (x1 >  10) x1 =  10;
     y.push(parseFloat(x1.toFixed(5)));
     prevErr = err;
   }
@@ -489,42 +510,29 @@ function simulate() {
   const okEr = ER <= GOALS.er;
   const pass  = okOS && okTs && okEr;
 
-  // Atualizar dot
-  const dot = document.getElementById('d' + attempts);
-  dot.classList.add(pass ? 'pass' : 'used');
-
+  document.getElementById('d' + attempts).classList.add(pass ? 'pass' : 'used');
   attempts++;
   finished = pass || attempts >= MAX_ATT;
 
-  // Métricas
   document.getElementById('metricsRow').style.display = 'grid';
   setMetric('mOS', OS.toFixed(1) + '%', okOS);
   setMetric('mTs', Ts.toFixed(2) + ' s', okTs);
   setMetric('mEr', ER.toFixed(2) + '%', okEr);
 
-  // Veredicto
   const vd = document.getElementById('verdict');
   vd.style.display = 'flex';
   vd.className = 'verdict ' + (pass ? 'pass' : 'fail');
   vd.textContent = pass
     ? '✓ Parabéns! Todos os critérios atingidos na tentativa ' + attempts + '.'
     : (attempts >= MAX_ATT
-        ? '✗ Tentativas esgotadas. O resultado será registrado.'
-        : '✗ Critérios não atingidos — analise e tente novamente. (' + (MAX_ATT - attempts) + ' restante(s))');
+        ? '✗ Tentativas esgotadas. O resultado final será registrado.'
+        : '✗ Critérios não atingidos — revise os ganhos e tente novamente. (' + (MAX_ATT - attempts) + ' restante(s))');
 
-  // Histórico local
-  const row = {
-    num: attempts, Kp, Ki, Kd,
-    OS: OS.toFixed(1), Ts: Ts.toFixed(2), ER: ER.toFixed(2),
-    pass
-  };
+  const row = { num: attempts, Kp, Ki, Kd, OS: OS.toFixed(1), Ts: Ts.toFixed(2), ER: ER.toFixed(2), pass };
   history.push(row);
   addHistRow(row);
-
-  // Gráfico
   drawChart(t, y, yMax);
 
-  // Desabilitar se acabou
   if (finished) {
     document.getElementById('simBtn').disabled = true;
     document.getElementById('simBtn').textContent = pass ? '✓ Concluído' : 'Tentativas esgotadas';
@@ -543,18 +551,17 @@ function addHistRow(r) {
   const tr = document.createElement('tr');
   tr.innerHTML =
     `<td>${r.num}</td><td>${r.Kp}</td><td>${r.Ki}</td><td>${r.Kd}</td>` +
-    `<td class="${r.OS<=GOALS.os?'ok':'nok'}">${r.OS}%</td>` +
-    `<td class="${r.Ts<=GOALS.ts?'ok':'nok'}">${r.Ts}</td>` +
-    `<td class="${r.ER<=GOALS.er?'ok':'nok'}">${r.ER}%</td>` +
+    `<td class="${r.OS <= GOALS.os ? 'ok' : 'nok'}">${r.OS}%</td>` +
+    `<td class="${r.Ts <= GOALS.ts ? 'ok' : 'nok'}">${r.Ts}</td>` +
+    `<td class="${r.ER <= GOALS.er ? 'ok' : 'nok'}">${r.ER}%</td>` +
     `<td>${r.pass ? '✅ Aprovado' : '❌ Falhou'}</td>`;
   tb.appendChild(tr);
 }
 
 function drawChart(t, y, yMax) {
-  const step = Math.max(1, Math.floor(t.length / 350));
+  const step = Math.max(1, Math.floor(t.length / 400));
   const tD = [], yD = [];
   for (let i = 0; i < t.length; i += step) { tD.push(t[i]); yD.push(y[i]); }
-  const ref = tD.map(() => 1);
 
   if (chart) chart.destroy();
   chart = new Chart(document.getElementById('respChart'), {
@@ -562,41 +569,27 @@ function drawChart(t, y, yMax) {
     data: {
       labels: tD,
       datasets: [
-        { label: 'y(t) — saída', data: yD, borderColor: '#4f8ef7', borderWidth: 2, pointRadius: 0, tension: 0.15 },
-        { label: 'Referência', data: ref, borderColor: '#7a7f99', borderWidth: 1.5, borderDash: [6, 4], pointRadius: 0 }
+        { label: 'y(t) — saída', data: yD, borderColor: '#1a56db', borderWidth: 2, pointRadius: 0, tension: 0.1 },
+        { label: 'Referência', data: tD.map(() => 1), borderColor: '#9ca3af', borderWidth: 1.5, borderDash: [6,4], pointRadius: 0 }
       ]
     },
     options: {
       responsive: true, maintainAspectRatio: false,
-      animation: { duration: 500 },
+      animation: { duration: 400 },
       scales: {
-        x: {
-          title: { display: true, text: 'Tempo (s)', color: '#7a7f99', font: { size: 12 } },
-          ticks: { maxTicksLimit: 10, color: '#7a7f99' },
-          grid: { color: 'rgba(255,255,255,0.05)' }
-        },
-        y: {
-          title: { display: true, text: 'Amplitude', color: '#7a7f99', font: { size: 12 } },
-          min: -0.1,
-          max: Math.max(1.5, parseFloat((yMax + 0.15).toFixed(2))),
-          ticks: { color: '#7a7f99' },
-          grid: { color: 'rgba(255,255,255,0.05)' }
-        }
+        x: { title: { display: true, text: 'Tempo (s)', color: '#6b7280', font: { size: 12 } }, ticks: { maxTicksLimit: 10, color: '#6b7280' }, grid: { color: 'rgba(0,0,0,0.05)' } },
+        y: { title: { display: true, text: 'Amplitude', color: '#6b7280', font: { size: 12 } }, min: -0.1, max: Math.max(1.5, parseFloat((yMax+0.15).toFixed(2))), ticks: { color: '#6b7280' }, grid: { color: 'rgba(0,0,0,0.05)' } }
       },
-      plugins: {
-        legend: { display: true, position: 'top', labels: { color: '#e8eaf0', boxWidth: 12, font: { size: 12 } } }
-      }
+      plugins: { legend: { display: true, position: 'top', labels: { color: '#374151', boxWidth: 12, font: { size: 12 } } } }
     }
   });
 }
 
 function sendToSheets() {
   if (APPS_SCRIPT_URL === 'COLE_AQUI_A_URL_DO_APPS_SCRIPT') {
-    console.warn('URL do Apps Script não configurada.');
     document.getElementById('sentMsg').style.display = 'flex';
     return;
   }
-
   const payload = {
     nome: studentName,
     timestamp: new Date().toLocaleString('pt-BR'),
@@ -604,17 +597,16 @@ function sendToSheets() {
     totalTentativas: attempts,
     tentativas: history
   };
-
   fetch(APPS_SCRIPT_URL, {
-    method: 'POST',
-    mode: 'no-cors',
+    method: 'POST', mode: 'no-cors',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload)
   }).then(() => {
     document.getElementById('sentMsg').style.display = 'flex';
   }).catch(() => {
-    document.getElementById('sentMsg').textContent = '⚠ Erro ao enviar. Anote o resultado e informe o professor.';
-    document.getElementById('sentMsg').style.display = 'flex';
+    const m = document.getElementById('sentMsg');
+    m.textContent = '⚠ Erro ao enviar. Anote o resultado e informe o professor.';
+    m.style.display = 'flex';
   });
 }
 </script>
