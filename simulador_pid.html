@@ -298,7 +298,7 @@
   <div class="header">
     <div class="header-tag">Controle Automático — Atividade Avaliativa</div>
     <h1>Desafio PID</h1>
-    <p>Ajuste os ganhos do controlador para atingir todos os critérios de desempenho. Você tem 5 tentativas.</p>
+    <p>Ajuste os ganhos do controlador para atingir todos os critérios de desempenho. Você tem 10 tentativas.</p>
   </div>
 
   <!-- Nome -->
@@ -362,6 +362,11 @@
         <div class="dot" id="d2"></div>
         <div class="dot" id="d3"></div>
         <div class="dot" id="d4"></div>
+        <div class="dot" id="d5"></div>
+        <div class="dot" id="d6"></div>
+        <div class="dot" id="d7"></div>
+        <div class="dot" id="d8"></div>
+        <div class="dot" id="d9"></div>
       </div>
     </div>
 
@@ -416,7 +421,7 @@ const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz8awdwu7ce2sH4
 const GOALS = { os: 10, ts: 4.0, er: 2 };
 const PLANT  = { wn: 3, zeta: 0.3 };
 const SIM    = { dt: 0.02, tmax: 15 };
-const MAX_ATT = 5;
+const MAX_ATT = 10;
 // =============================================
 
 let studentName = '';
