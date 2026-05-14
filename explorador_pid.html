@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Explorador PID — Controle Automático</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap');
+  :root {
+    --bg:#ffffff;--surface:#f7f8fa;--surface2:#eef0f4;
+    --border:rgba(0,0,0,0.08);--border2:rgba(0,0,0,0.14);
+    --accent:#1a56db;--accent2:#5521b5;--accent3:#0e7c5b;
+    --green:#057a55;--green-bg:#f0fdf4;--green-border:#86efac;
+    --red:#c81e1e;--text:#111827;--muted:#6b7280;
+    --mono:'IBM Plex Mono',monospace;--sans:'IBM Plex Sans',sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:100vh;padding:2rem 1rem}
+  .page{max-width:800px;margin:0 auto}
+
+  .header{margin-bottom:2rem;border-bottom:1px solid var(--border);padding-bottom:1.25rem}
+  .header-tag{font-family:var(--mono);font-size:11px;letter-spacing:.12em;color:var(--accent);text-transform:uppercase;margin-bottom:6px}
+  .header h1{font-size:24px;font-weight:600;letter-spacing:-.4px;margin-bottom:4px}
+  .header p{font-size:14px;color:var(--muted)}
+
+  .name-block{background:var(--surface);border:1px solid var(--border2);border-radius:10px;padding:1rem 1.25rem;margin-bottom:1.5rem;display:flex;gap:10px;align-items:center}
+  .name-block label{font-size:13px;color:var(--muted);white-space:nowrap}
+  .name-block input{flex:1;background:#fff;border:1px solid var(--border2);border-radius:7px;padding:8px 12px;font-family:var(--sans);font-size:14px;color:var(--text);outline:none;transition:border-color .2s}
+  .name-block input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(26,86,219,.08)}
+  .name-block input:disabled{opacity:.5;background:var(--surface2)}
+  .btn-confirm{background:var(--accent);color:#fff;border:none;border-radius:7px;padding:8px 18px;font-family:var(--sans);font-size:13px;font-weight:500;cursor:pointer;transition:opacity .2s;white-space:nowrap}
+  .btn-confirm:hover{opacity:.88}
+  .btn-confirm:disabled{opacity:.4;cursor:default}
+
+  .steps{display:flex;margin-bottom:2rem;border:1px solid var(--border2);border-radius:10px;overflow:hidden}
+  .step{flex:1;padding:12px 8px;text-align:center;font-size:13px;font-weight:500;color:var(--muted);background:var(--surface);border-right:1px solid var(--border2);transition:all .3s}
+  .step:last-child{border-right:none}
+  .step.active{background:#eff6ff;color:var(--accent)}
+  .step.done{background:var(--green-bg);color:var(--green)}
+  .step-num{font-family:var(--mono);font-size:10px;display:block;margin-bottom:2px;opacity:.6}
+
+  .plant-box{background:#f0f4ff;border:1px solid #c7d7fd;border-left:4px solid var(--accent);border-radius:10px;padding:1rem 1.25rem;margin-bottom:1rem}
+  .ctrl-box{background:#faf5ff;border:1px solid #ddd6fe;border-left:4px solid var(--accent2);border-radius:10px;padding:1rem 1.25rem;margin-bottom:1.5rem}
+  .box-title{font-size:11px;font-family:var(--mono);letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px}
+  .box-title.blue{color:var(--accent)}
+  .box-title.purple{color:var(--accent2)}
+  .plant-params{display:flex;flex-wrap:wrap;gap:6px 24px;font-size:13px;color:var(--muted);margin-top:6px}
+  .plant-params span{color:var(--text);font-weight:500;font-family:var(--mono)}
+  .eq-wrap{text-align:center;padding:6px 0;overflow-x:auto}
+
+  .phase-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.5rem;margin-bottom:1.5rem}
+  .phase-header{display:flex;align-items:center;gap:12px;margin-bottom:1.25rem}
+  .phase-badge{width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:18px;font-weight:700;flex-shrink:0}
+  .badge-kp{background:#eff6ff;color:var(--accent)}
+  .badge-ki{background:#faf5ff;color:var(--accent2)}
+  .badge-kd{background:#f0fdf4;color:var(--accent3)}
+  .phase-title{font-size:16px;font-weight:600}
+  .phase-sub{font-size:13px;color:var(--muted);margin-top:2px}
+
+  .fixed-gains{display:flex;gap:10px;margin-bottom:1rem;flex-wrap:wrap}
+  .fixed-tag{background:var(--surface2);border:1px solid var(--border2);border-radius:6px;padding:5px 12px;font-family:var(--mono);font-size:13px;color:var(--muted)}
+  .fixed-tag span{color:var(--text);font-weight:600}
+
+  .gain-input-wrap{margin-bottom:1rem}
+  .gain-input-label{font-size:12px;color:var(--muted);margin-bottom:6px;font-family:var(--mono);letter-spacing:.06em;text-transform:uppercase}
+  .gain-input-row{display:flex;gap:12px;align-items:center}
+  .gain-input-row input{width:160px;background:#fff;border:2px solid var(--border2);border-radius:8px;padding:10px 14px;font-family:var(--mono);font-size:18px;font-weight:700;color:var(--text);outline:none;transition:border-color .2s}
+  .gain-input-row input:focus{border-color:var(--accent)}
+  .gain-hint{font-size:12px;color:var(--muted)}
+
+  .att-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem}
+  .att-label{font-size:13px;color:var(--muted)}
+  .att-dots{display:flex;gap:5px}
+  .dot{width:11px;height:11px;border-radius:50%;background:var(--surface2);border:1px solid var(--border2);transition:background .3s}
+  .dot.used{background:var(--accent);border-color:var(--accent)}
+
+  .btn-sim{width:100%;padding:12px;background:var(--accent);border:none;border-radius:10px;font-family:var(--sans);font-size:15px;font-weight:600;color:#fff;cursor:pointer;margin-bottom:1.25rem;transition:opacity .2s,transform .1s}
+  .btn-sim:hover{opacity:.88}
+  .btn-sim:active{transform:scale(.99)}
+  .btn-sim:disabled{opacity:.3;cursor:default;transform:none}
+  .btn-next{width:100%;padding:12px;background:var(--green);border:none;border-radius:10px;font-family:var(--sans);font-size:15px;font-weight:600;color:#fff;cursor:pointer;margin-top:1rem;transition:opacity .2s;display:none}
+  .btn-next:hover{opacity:.88}
+
+  .chart-wrap{background:#fff;border:1px solid var(--border);border-radius:10px;padding:1rem;margin-bottom:1rem;position:relative;height:240px}
+
+  .metrics-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:1rem}
+  .metric-card{background:#fff;border:1px solid var(--border);border-radius:10px;padding:10px 12px;text-align:center}
+  .metric-label{font-size:11px;color:var(--muted);margin-bottom:4px}
+  .metric-val{font-family:var(--mono);font-size:18px;font-weight:600;color:var(--text)}
+
+  .verdict{border-radius:10px;padding:10px 14px;font-size:13px;font-weight:500;margin-bottom:.75rem;display:flex;align-items:center;gap:8px}
+  .verdict.info{background:#eff6ff;border:1px solid #bfdbfe;color:var(--accent)}
+  .verdict.done-phase{background:var(--green-bg);border:1px solid var(--green-border);color:var(--green)}
+  .verdict.sent{background:#eff6ff;border:1px solid #bfdbfe;color:var(--accent);margin-top:8px}
+
+  .hist-title{font-family:var(--mono);font-size:11px;letter-spacing:.08em;color:var(--muted);text-transform:uppercase;margin-bottom:6px;margin-top:1rem}
+  .hist-wrap{overflow-x:auto}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th{font-family:var(--mono);font-size:11px;letter-spacing:.05em;color:var(--muted);text-align:left;padding:7px 10px;border-bottom:1px solid var(--border2);font-weight:400;white-space:nowrap;background:var(--surface2)}
+  td{padding:6px 10px;border-bottom:1px solid var(--border);font-family:var(--mono);font-size:13px;color:var(--text);white-space:nowrap}
+  tr:last-child td{border-bottom:none}
+
+  .summary-box{background:var(--green-bg);border:1px solid var(--green-border);border-radius:12px;padding:1.5rem;margin-bottom:1.5rem;text-align:center}
+  .summary-box h2{font-size:20px;font-weight:600;color:var(--green);margin-bottom:6px}
+  .summary-box p{font-size:14px;color:var(--muted)}
+  .summary-gains{display:flex;justify-content:center;gap:16px;margin-top:1rem;flex-wrap:wrap}
+  .sg{background:#fff;border:1px solid var(--green-border);border-radius:8px;padding:10px 24px;text-align:center}
+  .sg-label{font-size:11px;color:var(--muted)}
+  .sg-val{font-family:var(--mono);font-size:22px;font-weight:700;color:var(--green)}
+
+  .locked{opacity:.3;pointer-events:none;user-select:none}
+  .divider{border:none;border-top:1px solid var(--border);margin:1.5rem 0}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="header">
+    <div class="header-tag">Controle Automático — Atividade Introdutória</div>
+    <h1>Explorador PID</h1>
+    <p>Explore o efeito de cada ganho separadamente, uma fase por vez. Complete as 3 fases para encerrar.</p>
+  </div>
+
+  <div class="name-block">
+    <label>Nome:</label>
+    <input type="text" id="nameInput" placeholder="Digite seu nome completo..." autocomplete="off"/>
+    <button class="btn-confirm" id="nameBtn" onclick="saveName()">Confirmar</button>
+  </div>
+
+  <div id="main" class="locked">
+
+    <div class="steps">
+      <div class="step active" id="step0"><span class="step-num">FASE 1</span>Ganho Kp</div>
+      <div class="step" id="step1"><span class="step-num">FASE 2</span>Ganho Ki</div>
+      <div class="step" id="step2"><span class="step-num">FASE 3</span>Ganho Kd</div>
+      <div class="step" id="step3"><span class="step-num">RESULTADO</span>Concluído</div>
+    </div>
+
+    <div class="plant-box">
+      <div class="box-title blue">Planta — G(s)</div>
+      <div class="eq-wrap">\[\displaystyle G(s) = \frac{\omega_n^2}{s^2 + 2\,\zeta\,\omega_n\,s + \omega_n^2}\]</div>
+      <div class="plant-params">
+        <div>Frequência natural: <span>ωₙ = 2 rad/s</span></div>
+        <div>Amortecimento: <span>ζ = 0,5</span></div>
+        <div>Entrada: <span>degrau unitário</span></div>
+      </div>
+    </div>
+
+    <div class="ctrl-box">
+      <div class="box-title purple">Controlador PID — C(s)</div>
+      <div class="eq-wrap">\[\displaystyle C(s) = K_p + \frac{K_i}{s} + K_d\,s\]</div>
+    </div>
+
+    <hr class="divider"/>
+
+    <!-- FASE 1 — Kp -->
+    <div class="phase-card" id="phaseKp">
+      <div class="phase-header">
+        <div class="phase-badge badge-kp">Kp</div>
+        <div>
+          <div class="phase-title">Fase 1 — Efeito do ganho proporcional</div>
+          <div class="phase-sub">Ki = 0 e Kd = 0 estão fixos. Varie somente Kp e observe o comportamento do sistema.</div>
+        </div>
+      </div>
+      <div class="fixed-gains">
+        <div class="fixed-tag">Ki = <span>0</span> (fixo)</div>
+        <div class="fixed-tag">Kd = <span>0</span> (fixo)</div>
+      </div>
+      <div class="gain-input-wrap">
+        <div class="gain-input-label">Kp — escolha um valor</div>
+        <div class="gain-input-row">
+          <input type="number" id="kpInput" value="1" min="0" step="0.1"/>
+          <span class="gain-hint">Sugestão: experimente entre 0 e 20</span>
+        </div>
+      </div>
+      <div class="att-row">
+        <span class="att-label">Tentativas (5 no total):</span>
+        <div class="att-dots">
+          <div class="dot" id="kp-d0"></div><div class="dot" id="kp-d1"></div>
+          <div class="dot" id="kp-d2"></div><div class="dot" id="kp-d3"></div>
+          <div class="dot" id="kp-d4"></div>
+        </div>
+      </div>
+      <button class="btn-sim" id="kpBtn" onclick="simPhase('kp')">▶ Simular com este Kp</button>
+      <div class="chart-wrap"><canvas id="kpChart"></canvas></div>
+      <div class="metrics-row" id="kpMetrics" style="display:none">
+        <div class="metric-card"><div class="metric-label">Overshoot</div><div class="metric-val" id="kp-os">—</div></div>
+        <div class="metric-card"><div class="metric-label">Tempo de acomodação</div><div class="metric-val" id="kp-ts">—</div></div>
+        <div class="metric-card"><div class="metric-label">Erro em regime</div><div class="metric-val" id="kp-er">—</div></div>
+      </div>
+      <div id="kpVerdict" style="display:none"></div>
+      <div class="hist-title">Histórico — Fase Kp</div>
+      <div class="hist-wrap">
+        <table><thead><tr><th>#</th><th>Kp</th><th>Overshoot (%)</th><th>Ts (s)</th><th>Erro (%)</th></tr></thead>
+        <tbody id="kpHist"></tbody></table>
+      </div>
+      <button class="btn-next" id="kpNext" onclick="nextPhase('ki')">Avançar para Fase 2 — Ki →</button>
+    </div>
+
+    <!-- FASE 2 — Ki -->
+    <div class="phase-card locked" id="phaseKi">
+      <div class="phase-header">
+        <div class="phase-badge badge-ki">Ki</div>
+        <div>
+          <div class="phase-title">Fase 2 — Efeito do ganho integral</div>
+          <div class="phase-sub">Kp fixo no último valor da fase anterior. Kd = 0. Varie somente Ki.</div>
+        </div>
+      </div>
+      <div class="fixed-gains">
+        <div class="fixed-tag">Kp = <span id="kpFixed">—</span> (fase 1)</div>
+        <div class="fixed-tag">Kd = <span>0</span> (fixo)</div>
+      </div>
+      <div class="gain-input-wrap">
+        <div class="gain-input-label">Ki — escolha um valor</div>
+        <div class="gain-input-row">
+          <input type="number" id="kiInput" value="0.5" min="0" step="0.1"/>
+          <span class="gain-hint">Sugestão: experimente entre 0 e 10</span>
+        </div>
+      </div>
+      <div class="att-row">
+        <span class="att-label">Tentativas (5 no total):</span>
+        <div class="att-dots">
+          <div class="dot" id="ki-d0"></div><div class="dot" id="ki-d1"></div>
+          <div class="dot" id="ki-d2"></div><div class="dot" id="ki-d3"></div>
+          <div class="dot" id="ki-d4"></div>
+        </div>
+      </div>
+      <button class="btn-sim" id="kiBtn" onclick="simPhase('ki')">▶ Simular com este Ki</button>
+      <div class="chart-wrap"><canvas id="kiChart"></canvas></div>
+      <div class="metrics-row" id="kiMetrics" style="display:none">
+        <div class="metric-card"><div class="metric-label">Overshoot</div><div class="metric-val" id="ki-os">—</div></div>
+        <div class="metric-card"><div class="metric-label">Tempo de acomodação</div><div class="metric-val" id="ki-ts">—</div></div>
+        <div class="metric-card"><div class="metric-label">Erro em regime</div><div class="metric-val" id="ki-er">—</div></div>
+      </div>
+      <div id="kiVerdict" style="display:none"></div>
+      <div class="hist-title">Histórico — Fase Ki</div>
+      <div class="hist-wrap">
+        <table><thead><tr><th>#</th><th>Kp</th><th>Ki</th><th>Overshoot (%)</th><th>Ts (s)</th><th>Erro (%)</th></tr></thead>
+        <tbody id="kiHist"></tbody></table>
+      </div>
+      <button class="btn-next" id="kiNext" onclick="nextPhase('kd')">Avançar para Fase 3 — Kd →</button>
+    </div>
+
+    <!-- FASE 3 — Kd -->
+    <div class="phase-card locked" id="phaseKd">
+      <div class="phase-header">
+        <div class="phase-badge badge-kd">Kd</div>
+        <div>
+          <div class="phase-title">Fase 3 — Efeito do ganho derivativo</div>
+          <div class="phase-sub">Kp e Ki fixos nos valores das fases anteriores. Varie somente Kd.</div>
+        </div>
+      </div>
+      <div class="fixed-gains">
+        <div class="fixed-tag">Kp = <span id="kpFixed2">—</span> (fase 1)</div>
+        <div class="fixed-tag">Ki = <span id="kiFixed">—</span> (fase 2)</div>
+      </div>
+      <div class="gain-input-wrap">
+        <div class="gain-input-label">Kd — escolha um valor</div>
+        <div class="gain-input-row">
+          <input type="number" id="kdInput" value="0.1" min="0" step="0.05"/>
+          <span class="gain-hint">Sugestão: experimente entre 0 e 5</span>
+        </div>
+      </div>
+      <div class="att-row">
+        <span class="att-label">Tentativas (5 no total):</span>
+        <div class="att-dots">
+          <div class="dot" id="kd-d0"></div><div class="dot" id="kd-d1"></div>
+          <div class="dot" id="kd-d2"></div><div class="dot" id="kd-d3"></div>
+          <div class="dot" id="kd-d4"></div>
+        </div>
+      </div>
+      <button class="btn-sim" id="kdBtn" onclick="simPhase('kd')">▶ Simular com este Kd</button>
+      <div class="chart-wrap"><canvas id="kdChart"></canvas></div>
+      <div class="metrics-row" id="kdMetrics" style="display:none">
+        <div class="metric-card"><div class="metric-label">Overshoot</div><div class="metric-val" id="kd-os">—</div></div>
+        <div class="metric-card"><div class="metric-label">Tempo de acomodação</div><div class="metric-val" id="kd-ts">—</div></div>
+        <div class="metric-card"><div class="metric-label">Erro em regime</div><div class="metric-val" id="kd-er">—</div></div>
+      </div>
+      <div id="kdVerdict" style="display:none"></div>
+      <div class="hist-title">Histórico — Fase Kd</div>
+      <div class="hist-wrap">
+        <table><thead><tr><th>#</th><th>Kp</th><th>Ki</th><th>Kd</th><th>Overshoot (%)</th><th>Ts (s)</th><th>Erro (%)</th></tr></thead>
+        <tbody id="kdHist"></tbody></table>
+      </div>
+      <button class="btn-next" id="kdNext" onclick="finalize()">Concluir exploração →</button>
+    </div>
+
+    <!-- Resultado Final -->
+    <div class="phase-card locked" id="phaseFinal">
+      <div class="summary-box">
+        <h2>✓ Exploração concluída!</h2>
+        <p>Estes foram os últimos ganhos que você usou em cada fase:</p>
+        <div class="summary-gains">
+          <div class="sg"><div class="sg-label">Kp</div><div class="sg-val" id="finalKp">—</div></div>
+          <div class="sg"><div class="sg-label">Ki</div><div class="sg-val" id="finalKi">—</div></div>
+          <div class="sg"><div class="sg-label">Kd</div><div class="sg-val" id="finalKd">—</div></div>
+        </div>
+      </div>
+      <div id="finalSent" style="display:none" class="verdict sent">✓ Resultado enviado para a planilha do professor.</div>
+      <p style="font-size:14px;color:var(--muted);text-align:center;margin-top:1rem">
+        Use esses valores como ponto de partida no <strong>Desafio PID</strong>!
+      </p>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const APPS_SCRIPT_URL = 'COLE_AQUI_A_URL_DO_APPS_SCRIPT_EXPLORADOR';
+const PLANT   = { wn: 2, zeta: 0.5 };
+const SIM     = { dt: 0.02, tmax: 20 };
+const MAX_ATT = 5;
+
+let studentName = '';
+let charts = { kp: null, ki: null, kd: null };
+let attempts = { kp: 0, ki: 0, kd: 0 };
+let histories = { kp: [], ki: [], kd: [] };
+let bestGains = { kp: 1, ki: 0, kd: 0 };
+let phaseDone = { kp: false, ki: false, kd: false };
+
+function saveName() {
+  const v = document.getElementById('nameInput').value.trim();
+  if (!v) { alert('Por favor, informe seu nome completo.'); return; }
+  studentName = v;
+  document.getElementById('nameBtn').textContent = '✓ ' + v;
+  document.getElementById('nameInput').disabled = true;
+  document.getElementById('nameBtn').disabled = true;
+  document.getElementById('main').classList.remove('locked');
+  if (window.MathJax) MathJax.typeset();
+}
+
+function runSim(Kp, Ki, Kd) {
+  const { wn, zeta } = PLANT;
+  const { dt, tmax } = SIM;
+  const steps = Math.round(tmax / dt);
+  const t = [], y = [];
+  let x1=0, x2=0, intErr=0, prevErr=0;
+  for (let i = 0; i <= steps; i++) {
+    t.push(parseFloat((i * dt).toFixed(3)));
+    const err = 1 - x1;
+    intErr += err * dt;
+    const dErr = (err - prevErr) / dt;
+    const u = Kp * err + Ki * intErr + Kd * dErr;
+    const ax2 = -2 * zeta * wn * x2 - wn * wn * x1 + wn * wn * u;
+    x1 += x2 * dt; x2 += ax2 * dt;
+    if (x1 < -10) x1 = -10; if (x1 > 10) x1 = 10;
+    y.push(parseFloat(x1.toFixed(5)));
+    prevErr = err;
+  }
+  const yFinal = y[y.length - 1];
+  const yMax = Math.max(...y);
+  const OS = yMax > 1 ? parseFloat(((yMax - 1) * 100).toFixed(1)) : 0;
+  const ER = parseFloat((Math.abs(1 - yFinal) * 100).toFixed(2));
+  let Ts = tmax;
+  for (let i = y.length - 1; i >= 0; i--) {
+    if (Math.abs(y[i] - yFinal) > 0.02) { Ts = parseFloat((t[i+1]||t[i]).toFixed(2)); break; }
+    if (i === 0) Ts = 0;
+  }
+  return { t, y, yMax, OS, ER, Ts: parseFloat(Ts.toFixed(2)) };
+}
+
+function drawChart(id, t, y, yMax) {
+  const step = Math.max(1, Math.floor(t.length / 350));
+  const tD = [], yD = [];
+  for (let i = 0; i < t.length; i += step) { tD.push(t[i]); yD.push(y[i]); }
+  if (charts[id]) charts[id].destroy();
+  charts[id] = new Chart(document.getElementById(id + 'Chart'), {
+    type: 'line',
+    data: { labels: tD, datasets: [
+      { label: 'y(t) — saída', data: yD, borderColor: '#1a56db', borderWidth: 2, pointRadius: 0, tension: 0.1 },
+      { label: 'Referência', data: tD.map(() => 1), borderColor: '#9ca3af', borderWidth: 1.5, borderDash: [6,4], pointRadius: 0 }
+    ]},
+    options: {
+      responsive: true, maintainAspectRatio: false, animation: { duration: 350 },
+      scales: {
+        x: { title: { display: true, text: 'Tempo (s)', color: '#6b7280', font: { size: 11 } }, ticks: { maxTicksLimit: 8, color: '#6b7280' }, grid: { color: 'rgba(0,0,0,0.04)' } },
+        y: { title: { display: true, text: 'Amplitude', color: '#6b7280', font: { size: 11 } }, min: -0.1, max: Math.max(1.5, yMax + 0.1), ticks: { color: '#6b7280' }, grid: { color: 'rgba(0,0,0,0.04)' } }
+      },
+      plugins: { legend: { display: true, position: 'top', labels: { color: '#374151', boxWidth: 10, font: { size: 11 } } } }
+    }
+  });
+}
+
+function simPhase(phase) {
+  if (attempts[phase] >= MAX_ATT || phaseDone[phase]) return;
+
+  let Kp, Ki, Kd;
+  if (phase === 'kp') {
+    Kp = parseFloat(document.getElementById('kpInput').value) || 0; Ki = 0; Kd = 0;
+    bestGains.kp = Kp;
+  } else if (phase === 'ki') {
+    Kp = bestGains.kp;
+    Ki = parseFloat(document.getElementById('kiInput').value) || 0; Kd = 0;
+    bestGains.ki = Ki;
+  } else {
+    Kp = bestGains.kp; Ki = bestGains.ki;
+    Kd = parseFloat(document.getElementById('kdInput').value) || 0;
+    bestGains.kd = Kd;
+  }
+
+  const res = runSim(Kp, Ki, Kd);
+  document.getElementById(phase + '-d' + attempts[phase]).classList.add('used');
+  attempts[phase]++;
+
+  document.getElementById(phase + 'Metrics').style.display = 'grid';
+  document.getElementById(phase + '-os').textContent = res.OS.toFixed(1) + '%';
+  document.getElementById(phase + '-ts').textContent = res.Ts.toFixed(2) + ' s';
+  document.getElementById(phase + '-er').textContent = res.ER.toFixed(2) + '%';
+
+  const tb = document.getElementById(phase + 'Hist');
+  const tr = document.createElement('tr');
+  if (phase === 'kp')
+    tr.innerHTML = `<td>${attempts[phase]}</td><td>${Kp}</td><td>${res.OS.toFixed(1)}%</td><td>${res.Ts.toFixed(2)}</td><td>${res.ER.toFixed(2)}%</td>`;
+  else if (phase === 'ki')
+    tr.innerHTML = `<td>${attempts[phase]}</td><td>${Kp}</td><td>${Ki}</td><td>${res.OS.toFixed(1)}%</td><td>${res.Ts.toFixed(2)}</td><td>${res.ER.toFixed(2)}%</td>`;
+  else
+    tr.innerHTML = `<td>${attempts[phase]}</td><td>${Kp}</td><td>${Ki}</td><td>${Kd}</td><td>${res.OS.toFixed(1)}%</td><td>${res.Ts.toFixed(2)}</td><td>${res.ER.toFixed(2)}%</td>`;
+  tb.appendChild(tr);
+
+  histories[phase].push({ Kp, Ki, Kd, OS: res.OS.toFixed(1), Ts: res.Ts.toFixed(2), ER: res.ER.toFixed(2) });
+  drawChart(phase, res.t, res.y, res.yMax);
+
+  const vd = document.getElementById(phase + 'Verdict');
+  vd.style.display = 'flex';
+  const restantes = MAX_ATT - attempts[phase];
+  if (restantes > 0) {
+    vd.className = 'verdict info';
+    vd.textContent = `Tentativa ${attempts[phase]} concluída — observe o gráfico e tente outro valor (${restantes} restante(s)), ou avance para a próxima fase.`;
+  } else {
+    vd.className = 'verdict done-phase';
+    vd.textContent = `Tentativas encerradas. O valor usado será carregado na próxima fase.`;
+    document.getElementById(phase + 'Btn').disabled = true;
+  }
+  document.getElementById(phase + 'Next').style.display = 'block';
+}
+
+function nextPhase(next) {
+  const current = next === 'ki' ? 'kp' : 'ki';
+  phaseDone[current] = true;
+  document.getElementById(current + 'Btn').disabled = true;
+  document.getElementById(current + 'Next').style.display = 'none';
+
+  const stepMap = { kp: 0, ki: 1, kd: 2 };
+  document.getElementById('step' + stepMap[current]).classList.remove('active');
+  document.getElementById('step' + stepMap[current]).classList.add('done');
+
+  if (next === 'ki') {
+    document.getElementById('step1').classList.add('active');
+    document.getElementById('phaseKi').classList.remove('locked');
+    document.getElementById('kpFixed').textContent = bestGains.kp;
+    document.getElementById('phaseKi').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  } else {
+    document.getElementById('step2').classList.add('active');
+    document.getElementById('phaseKd').classList.remove('locked');
+    document.getElementById('kpFixed2').textContent = bestGains.kp;
+    document.getElementById('kiFixed').textContent = bestGains.ki;
+    phaseDone['ki'] = true;
+    document.getElementById('kiBtn').disabled = true;
+    document.getElementById('kiNext').style.display = 'none';
+    document.getElementById('phaseKd').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+}
+
+function finalize() {
+  phaseDone['kd'] = true;
+  document.getElementById('kdBtn').disabled = true;
+  document.getElementById('kdNext').style.display = 'none';
+  document.getElementById('step2').classList.remove('active');
+  document.getElementById('step2').classList.add('done');
+  document.getElementById('step3').classList.add('done');
+
+  document.getElementById('finalKp').textContent = bestGains.kp;
+  document.getElementById('finalKi').textContent = bestGains.ki;
+  document.getElementById('finalKd').textContent = bestGains.kd;
+  document.getElementById('phaseFinal').classList.remove('locked');
+  document.getElementById('phaseFinal').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  sendToSheets();
+}
+
+function sendToSheets() {
+  if (APPS_SCRIPT_URL === 'COLE_AQUI_A_URL_DO_APPS_SCRIPT_EXPLORADOR') {
+    document.getElementById('finalSent').style.display = 'flex'; return;
+  }
+  const payload = {
+    nome: studentName,
+    timestamp: new Date().toLocaleString('pt-BR'),
+    melhorKp: bestGains.kp, melhorKi: bestGains.ki, melhorKd: bestGains.kd,
+    faseKp: histories.kp, faseKi: histories.ki, faseKd: histories.kd
+  };
+  fetch(APPS_SCRIPT_URL, {
+    method: 'POST', mode: 'no-cors',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  }).then(() => {
+    document.getElementById('finalSent').style.display = 'flex';
+  }).catch(() => {
+    const m = document.getElementById('finalSent');
+    m.textContent = '⚠ Erro ao enviar. Anote os ganhos e informe o professor.';
+    m.style.display = 'flex';
+  });
+}
+</script>
+</body>
+</html>
