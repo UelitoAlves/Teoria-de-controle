@@ -13,7 +13,8 @@
     --border:rgba(0,0,0,0.08);--border2:rgba(0,0,0,0.14);
     --accent:#1a56db;--accent2:#5521b5;--accent3:#0e7c5b;
     --green:#057a55;--green-bg:#f0fdf4;--green-border:#86efac;
-    --red:#c81e1e;--text:#111827;--muted:#6b7280;
+    --amber:#b45309;--amber-bg:#fffbeb;
+    --text:#111827;--muted:#6b7280;
     --mono:'IBM Plex Mono',monospace;--sans:'IBM Plex Sans',sans-serif;
   }
   *{box-sizing:border-box;margin:0;padding:0}
@@ -30,7 +31,7 @@
   .name-block input{flex:1;background:#fff;border:1px solid var(--border2);border-radius:7px;padding:8px 12px;font-family:var(--sans);font-size:14px;color:var(--text);outline:none;transition:border-color .2s}
   .name-block input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(26,86,219,.08)}
   .name-block input:disabled{opacity:.5;background:var(--surface2)}
-  .btn-confirm{background:var(--accent);color:#fff;border:none;border-radius:7px;padding:8px 18px;font-family:var(--sans);font-size:13px;font-weight:500;cursor:pointer;transition:opacity .2s;white-space:nowrap}
+  .btn-confirm{background:var(--accent);color:#fff;border:none;border-radius:7px;padding:8px 18px;font-family:var(--sans);font-size:13px;font-weight:500;cursor:pointer;white-space:nowrap}
   .btn-confirm:hover{opacity:.88}
   .btn-confirm:disabled{opacity:.4;cursor:default}
 
@@ -80,8 +81,6 @@
   .btn-sim:hover{opacity:.88}
   .btn-sim:active{transform:scale(.99)}
   .btn-sim:disabled{opacity:.3;cursor:default;transform:none}
-  .btn-next{width:100%;padding:12px;background:var(--green);border:none;border-radius:10px;font-family:var(--sans);font-size:15px;font-weight:600;color:#fff;cursor:pointer;margin-top:1rem;transition:opacity .2s;display:none}
-  .btn-next:hover{opacity:.88}
 
   .chart-wrap{background:#fff;border:1px solid var(--border);border-radius:10px;padding:1rem;margin-bottom:1rem;position:relative;height:240px}
 
@@ -90,17 +89,32 @@
   .metric-label{font-size:11px;color:var(--muted);margin-bottom:4px}
   .metric-val{font-family:var(--mono);font-size:18px;font-weight:600;color:var(--text)}
 
-  .verdict{border-radius:10px;padding:10px 14px;font-size:13px;font-weight:500;margin-bottom:.75rem;display:flex;align-items:center;gap:8px}
-  .verdict.info{background:#eff6ff;border:1px solid #bfdbfe;color:var(--accent)}
-  .verdict.done-phase{background:var(--green-bg);border:1px solid var(--green-border);color:var(--green)}
-  .verdict.sent{background:#eff6ff;border:1px solid #bfdbfe;color:var(--accent);margin-top:8px}
-
-  .hist-title{font-family:var(--mono);font-size:11px;letter-spacing:.08em;color:var(--muted);text-transform:uppercase;margin-bottom:6px;margin-top:1rem}
-  .hist-wrap{overflow-x:auto}
+  /* Tabela de seleção */
+  .select-title{font-size:13px;font-weight:600;color:var(--text);margin-bottom:8px;margin-top:1rem}
+  .select-hint{font-size:12px;color:var(--muted);margin-bottom:10px}
+  .hist-wrap{overflow-x:auto;margin-bottom:1rem}
   table{width:100%;border-collapse:collapse;font-size:13px}
   th{font-family:var(--mono);font-size:11px;letter-spacing:.05em;color:var(--muted);text-align:left;padding:7px 10px;border-bottom:1px solid var(--border2);font-weight:400;white-space:nowrap;background:var(--surface2)}
-  td{padding:6px 10px;border-bottom:1px solid var(--border);font-family:var(--mono);font-size:13px;color:var(--text);white-space:nowrap}
+  td{padding:7px 10px;border-bottom:1px solid var(--border);font-family:var(--mono);font-size:13px;color:var(--text);white-space:nowrap}
   tr:last-child td{border-bottom:none}
+  tr.selectable{cursor:pointer;transition:background .15s}
+  tr.selectable:hover td{background:#eff6ff}
+  tr.selected td{background:#dbeafe!important;font-weight:600}
+  tr.selected td:first-child::before{content:'▶ ';color:var(--accent)}
+
+  /* Painel de seleção */
+  .select-panel{background:var(--amber-bg);border:1px solid #fde68a;border-radius:10px;padding:1rem 1.25rem;margin-bottom:1rem;display:none}
+  .select-panel-title{font-size:13px;font-weight:600;color:var(--amber);margin-bottom:8px}
+  .select-panel-body{font-size:13px;color:var(--text);margin-bottom:12px}
+  .selected-preview{font-family:var(--mono);font-size:14px;font-weight:600;color:var(--accent);background:#eff6ff;border:1px solid #bfdbfe;border-radius:6px;padding:6px 12px;display:inline-block;margin-bottom:12px}
+
+  .btn-next{width:100%;padding:12px;background:var(--green);border:none;border-radius:10px;font-family:var(--sans);font-size:15px;font-weight:600;color:#fff;cursor:pointer;transition:opacity .2s}
+  .btn-next:hover{opacity:.88}
+  .btn-next:disabled{opacity:.3;cursor:default}
+
+  .verdict{border-radius:10px;padding:10px 14px;font-size:13px;font-weight:500;margin-bottom:.75rem;display:flex;align-items:center;gap:8px}
+  .verdict.info{background:#eff6ff;border:1px solid #bfdbfe;color:var(--accent)}
+  .verdict.sent{background:#eff6ff;border:1px solid #bfdbfe;color:var(--accent);margin-top:8px}
 
   .summary-box{background:var(--green-bg);border:1px solid var(--green-border);border-radius:12px;padding:1.5rem;margin-bottom:1.5rem;text-align:center}
   .summary-box h2{font-size:20px;font-weight:600;color:var(--green);margin-bottom:6px}
@@ -120,7 +134,7 @@
   <div class="header">
     <div class="header-tag">Controle Automático — Atividade Introdutória</div>
     <h1>Explorador PID</h1>
-    <p>Explore o efeito de cada ganho separadamente, uma fase por vez. Complete as 3 fases para encerrar.</p>
+    <p>Explore o efeito de cada ganho separadamente. Ao final de cada fase, <strong>você escolhe qual resultado levar adiante</strong>.</p>
   </div>
 
   <div class="name-block">
@@ -155,7 +169,7 @@
 
     <hr class="divider"/>
 
-    <!-- FASE 1 — Kp -->
+    <!-- ===== FASE 1 — Kp ===== -->
     <div class="phase-card" id="phaseKp">
       <div class="phase-header">
         <div class="phase-badge badge-kp">Kp</div>
@@ -172,7 +186,7 @@
         <div class="gain-input-label">Kp — escolha um valor</div>
         <div class="gain-input-row">
           <input type="number" id="kpInput" value="1" min="0" step="0.1"/>
-          <span class="gain-hint">Sugestão: experimente entre 0 e 20</span>
+          <span class="gain-hint">Experimente entre 0,1 e 20</span>
         </div>
       </div>
       <div class="att-row">
@@ -190,33 +204,42 @@
         <div class="metric-card"><div class="metric-label">Tempo de acomodação</div><div class="metric-val" id="kp-ts">—</div></div>
         <div class="metric-card"><div class="metric-label">Erro em regime</div><div class="metric-val" id="kp-er">—</div></div>
       </div>
-      <div id="kpVerdict" style="display:none"></div>
-      <div class="hist-title">Histórico — Fase Kp</div>
+
+      <!-- Tabela + seleção -->
+      <div class="select-title">Histórico de tentativas — clique em uma linha para selecioná-la</div>
+      <div class="select-hint">Analise os resultados e escolha o Kp que levará para a Fase 2.</div>
       <div class="hist-wrap">
-        <table><thead><tr><th>#</th><th>Kp</th><th>Overshoot (%)</th><th>Ts (s)</th><th>Erro (%)</th></tr></thead>
+        <table><thead><tr><th>Selecionar</th><th>#</th><th>Kp</th><th>Overshoot (%)</th><th>Ts (s)</th><th>Erro (%)</th></tr></thead>
         <tbody id="kpHist"></tbody></table>
       </div>
-      <button class="btn-next" id="kpNext" onclick="nextPhase('ki')">Avançar para Fase 2 — Ki →</button>
+
+      <div class="select-panel" id="kpSelectPanel">
+        <div class="select-panel-title">✔ Valor selecionado para a Fase 2</div>
+        <div class="select-panel-body">O valor abaixo será usado como Kp fixo na fase seguinte:</div>
+        <div class="selected-preview" id="kpSelectedPreview">—</div>
+        <br/>
+        <button class="btn-next" id="kpNext" onclick="nextPhase('ki')" disabled>Avançar para Fase 2 — Ki →</button>
+      </div>
     </div>
 
-    <!-- FASE 2 — Ki -->
+    <!-- ===== FASE 2 — Ki ===== -->
     <div class="phase-card locked" id="phaseKi">
       <div class="phase-header">
         <div class="phase-badge badge-ki">Ki</div>
         <div>
           <div class="phase-title">Fase 2 — Efeito do ganho integral</div>
-          <div class="phase-sub">Kp fixo no último valor da fase anterior. Kd = 0. Varie somente Ki.</div>
+          <div class="phase-sub">Kp fixo no valor que você escolheu. Kd = 0. Varie somente Ki e observe.</div>
         </div>
       </div>
       <div class="fixed-gains">
-        <div class="fixed-tag">Kp = <span id="kpFixed">—</span> (fase 1)</div>
+        <div class="fixed-tag">Kp = <span id="kpFixed">—</span> (escolhido na fase 1)</div>
         <div class="fixed-tag">Kd = <span>0</span> (fixo)</div>
       </div>
       <div class="gain-input-wrap">
         <div class="gain-input-label">Ki — escolha um valor</div>
         <div class="gain-input-row">
           <input type="number" id="kiInput" value="0.5" min="0" step="0.1"/>
-          <span class="gain-hint">Sugestão: experimente entre 0 e 10</span>
+          <span class="gain-hint">Experimente entre 0 e 10</span>
         </div>
       </div>
       <div class="att-row">
@@ -234,22 +257,30 @@
         <div class="metric-card"><div class="metric-label">Tempo de acomodação</div><div class="metric-val" id="ki-ts">—</div></div>
         <div class="metric-card"><div class="metric-label">Erro em regime</div><div class="metric-val" id="ki-er">—</div></div>
       </div>
-      <div id="kiVerdict" style="display:none"></div>
-      <div class="hist-title">Histórico — Fase Ki</div>
+
+      <div class="select-title">Histórico de tentativas — clique em uma linha para selecioná-la</div>
+      <div class="select-hint">Escolha o par Kp+Ki que levará para a Fase 3.</div>
       <div class="hist-wrap">
-        <table><thead><tr><th>#</th><th>Kp</th><th>Ki</th><th>Overshoot (%)</th><th>Ts (s)</th><th>Erro (%)</th></tr></thead>
+        <table><thead><tr><th>Selecionar</th><th>#</th><th>Kp</th><th>Ki</th><th>Overshoot (%)</th><th>Ts (s)</th><th>Erro (%)</th></tr></thead>
         <tbody id="kiHist"></tbody></table>
       </div>
-      <button class="btn-next" id="kiNext" onclick="nextPhase('kd')">Avançar para Fase 3 — Kd →</button>
+
+      <div class="select-panel" id="kiSelectPanel">
+        <div class="select-panel-title">✔ Valores selecionados para a Fase 3</div>
+        <div class="select-panel-body">Os valores abaixo serão usados como Kp e Ki fixos na fase seguinte:</div>
+        <div class="selected-preview" id="kiSelectedPreview">—</div>
+        <br/>
+        <button class="btn-next" id="kiNext" onclick="nextPhase('kd')" disabled>Avançar para Fase 3 — Kd →</button>
+      </div>
     </div>
 
-    <!-- FASE 3 — Kd -->
+    <!-- ===== FASE 3 — Kd ===== -->
     <div class="phase-card locked" id="phaseKd">
       <div class="phase-header">
         <div class="phase-badge badge-kd">Kd</div>
         <div>
           <div class="phase-title">Fase 3 — Efeito do ganho derivativo</div>
-          <div class="phase-sub">Kp e Ki fixos nos valores das fases anteriores. Varie somente Kd.</div>
+          <div class="phase-sub">Kp e Ki fixos nos valores escolhidos. Varie somente Kd e observe.</div>
         </div>
       </div>
       <div class="fixed-gains">
@@ -260,7 +291,7 @@
         <div class="gain-input-label">Kd — escolha um valor</div>
         <div class="gain-input-row">
           <input type="number" id="kdInput" value="0.1" min="0" step="0.05"/>
-          <span class="gain-hint">Sugestão: experimente entre 0 e 5</span>
+          <span class="gain-hint">Experimente entre 0 e 5</span>
         </div>
       </div>
       <div class="att-row">
@@ -278,20 +309,27 @@
         <div class="metric-card"><div class="metric-label">Tempo de acomodação</div><div class="metric-val" id="kd-ts">—</div></div>
         <div class="metric-card"><div class="metric-label">Erro em regime</div><div class="metric-val" id="kd-er">—</div></div>
       </div>
-      <div id="kdVerdict" style="display:none"></div>
-      <div class="hist-title">Histórico — Fase Kd</div>
+
+      <div class="select-title">Histórico de tentativas — clique em uma linha para selecioná-la</div>
+      <div class="select-hint">Escolha o melhor conjunto de ganhos e conclua a exploração.</div>
       <div class="hist-wrap">
-        <table><thead><tr><th>#</th><th>Kp</th><th>Ki</th><th>Kd</th><th>Overshoot (%)</th><th>Ts (s)</th><th>Erro (%)</th></tr></thead>
+        <table><thead><tr><th>Selecionar</th><th>#</th><th>Kp</th><th>Ki</th><th>Kd</th><th>Overshoot (%)</th><th>Ts (s)</th><th>Erro (%)</th></tr></thead>
         <tbody id="kdHist"></tbody></table>
       </div>
-      <button class="btn-next" id="kdNext" onclick="finalize()">Concluir exploração →</button>
+
+      <div class="select-panel" id="kdSelectPanel">
+        <div class="select-panel-title">✔ Ganhos finais selecionados</div>
+        <div class="selected-preview" id="kdSelectedPreview">—</div>
+        <br/>
+        <button class="btn-next" id="kdNext" onclick="finalize()" disabled>Concluir exploração →</button>
+      </div>
     </div>
 
-    <!-- Resultado Final -->
+    <!-- ===== RESULTADO FINAL ===== -->
     <div class="phase-card locked" id="phaseFinal">
       <div class="summary-box">
         <h2>✓ Exploração concluída!</h2>
-        <p>Estes foram os últimos ganhos que você usou em cada fase:</p>
+        <p>Estes foram os ganhos que você escolheu ao longo das fases:</p>
         <div class="summary-gains">
           <div class="sg"><div class="sg-label">Kp</div><div class="sg-val" id="finalKp">—</div></div>
           <div class="sg"><div class="sg-label">Ki</div><div class="sg-val" id="finalKi">—</div></div>
@@ -308,16 +346,18 @@
 </div>
 
 <script>
+// =============================================
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwu7VnZWr9usILfHBc9IkTZmw-lo-P1tn0C2oTXMBVylYzZTHCKZh7wEh8J8Nu-65T8/exec';
 const PLANT   = { wn: 2, zeta: 0.5 };
 const SIM     = { dt: 0.02, tmax: 20 };
 const MAX_ATT = 5;
+// =============================================
 
 let studentName = '';
-let charts = { kp: null, ki: null, kd: null };
+let charts  = { kp: null, ki: null, kd: null };
 let attempts = { kp: 0, ki: 0, kd: 0 };
 let histories = { kp: [], ki: [], kd: [] };
-let bestGains = { kp: 1, ki: 0, kd: 0 };
+let chosen = { kp: null, ki: null, kd: null }; // linha escolhida por fase
 let phaseDone = { kp: false, ki: false, kd: false };
 
 function saveName() {
@@ -370,15 +410,15 @@ function drawChart(id, t, y, yMax) {
     type: 'line',
     data: { labels: tD, datasets: [
       { label: 'y(t) — saída', data: yD, borderColor: '#1a56db', borderWidth: 2, pointRadius: 0, tension: 0.1 },
-      { label: 'Referência', data: tD.map(() => 1), borderColor: '#9ca3af', borderWidth: 1.5, borderDash: [6,4], pointRadius: 0 }
+      { label: 'Referência',  data: tD.map(()=>1), borderColor: '#9ca3af', borderWidth: 1.5, borderDash:[6,4], pointRadius: 0 }
     ]},
     options: {
-      responsive: true, maintainAspectRatio: false, animation: { duration: 350 },
-      scales: {
-        x: { title: { display: true, text: 'Tempo (s)', color: '#6b7280', font: { size: 11 } }, ticks: { maxTicksLimit: 8, color: '#6b7280' }, grid: { color: 'rgba(0,0,0,0.04)' } },
-        y: { title: { display: true, text: 'Amplitude', color: '#6b7280', font: { size: 11 } }, min: -0.1, max: Math.max(1.5, yMax + 0.1), ticks: { color: '#6b7280' }, grid: { color: 'rgba(0,0,0,0.04)' } }
+      responsive:true, maintainAspectRatio:false, animation:{duration:350},
+      scales:{
+        x:{title:{display:true,text:'Tempo (s)',color:'#6b7280',font:{size:11}},ticks:{maxTicksLimit:8,color:'#6b7280'},grid:{color:'rgba(0,0,0,0.04)'}},
+        y:{title:{display:true,text:'Amplitude',color:'#6b7280',font:{size:11}},min:-0.1,max:Math.max(1.5,yMax+0.1),ticks:{color:'#6b7280'},grid:{color:'rgba(0,0,0,0.04)'}}
       },
-      plugins: { legend: { display: true, position: 'top', labels: { color: '#374151', boxWidth: 10, font: { size: 11 } } } }
+      plugins:{legend:{display:true,position:'top',labels:{color:'#374151',boxWidth:10,font:{size:11}}}}
     }
   });
 }
@@ -388,117 +428,132 @@ function simPhase(phase) {
 
   let Kp, Ki, Kd;
   if (phase === 'kp') {
-    Kp = parseFloat(document.getElementById('kpInput').value) || 0; Ki = 0; Kd = 0;
-    bestGains.kp = Kp;
+    Kp = parseFloat(document.getElementById('kpInput').value)||0; Ki=0; Kd=0;
   } else if (phase === 'ki') {
-    Kp = bestGains.kp;
-    Ki = parseFloat(document.getElementById('kiInput').value) || 0; Kd = 0;
-    bestGains.ki = Ki;
+    Kp = chosen.kp.Kp;
+    Ki = parseFloat(document.getElementById('kiInput').value)||0; Kd=0;
   } else {
-    Kp = bestGains.kp; Ki = bestGains.ki;
-    Kd = parseFloat(document.getElementById('kdInput').value) || 0;
-    bestGains.kd = Kd;
+    Kp = chosen.ki.Kp; Ki = chosen.ki.Ki;
+    Kd = parseFloat(document.getElementById('kdInput').value)||0;
   }
 
   const res = runSim(Kp, Ki, Kd);
-  document.getElementById(phase + '-d' + attempts[phase]).classList.add('used');
+  document.getElementById(phase+'-d'+attempts[phase]).classList.add('used');
   attempts[phase]++;
 
-  document.getElementById(phase + 'Metrics').style.display = 'grid';
-  document.getElementById(phase + '-os').textContent = res.OS.toFixed(1) + '%';
-  document.getElementById(phase + '-ts').textContent = res.Ts.toFixed(2) + ' s';
-  document.getElementById(phase + '-er').textContent = res.ER.toFixed(2) + '%';
+  document.getElementById(phase+'Metrics').style.display='grid';
+  document.getElementById(phase+'-os').textContent=res.OS.toFixed(1)+'%';
+  document.getElementById(phase+'-ts').textContent=res.Ts.toFixed(2)+' s';
+  document.getElementById(phase+'-er').textContent=res.ER.toFixed(2)+'%';
 
-  const tb = document.getElementById(phase + 'Hist');
-  const tr = document.createElement('tr');
-  if (phase === 'kp')
-    tr.innerHTML = `<td>${attempts[phase]}</td><td>${Kp}</td><td>${res.OS.toFixed(1)}%</td><td>${res.Ts.toFixed(2)}</td><td>${res.ER.toFixed(2)}%</td>`;
-  else if (phase === 'ki')
-    tr.innerHTML = `<td>${attempts[phase]}</td><td>${Kp}</td><td>${Ki}</td><td>${res.OS.toFixed(1)}%</td><td>${res.Ts.toFixed(2)}</td><td>${res.ER.toFixed(2)}%</td>`;
-  else
-    tr.innerHTML = `<td>${attempts[phase]}</td><td>${Kp}</td><td>${Ki}</td><td>${Kd}</td><td>${res.OS.toFixed(1)}%</td><td>${res.Ts.toFixed(2)}</td><td>${res.ER.toFixed(2)}%</td>`;
-  tb.appendChild(tr);
-
-  histories[phase].push({ Kp, Ki, Kd, OS: res.OS.toFixed(1), Ts: res.Ts.toFixed(2), ER: res.ER.toFixed(2) });
+  const entry = { num: attempts[phase], Kp, Ki, Kd, OS: res.OS.toFixed(1), Ts: res.Ts.toFixed(2), ER: res.ER.toFixed(2) };
+  histories[phase].push(entry);
+  addHistRow(phase, entry);
   drawChart(phase, res.t, res.y, res.yMax);
 
-  const vd = document.getElementById(phase + 'Verdict');
-  vd.style.display = 'flex';
-  const restantes = MAX_ATT - attempts[phase];
-  if (restantes > 0) {
-    vd.className = 'verdict info';
-    vd.textContent = `Tentativa ${attempts[phase]} concluída — observe o gráfico e tente outro valor (${restantes} restante(s)), ou avance para a próxima fase.`;
-  } else {
-    vd.className = 'verdict done-phase';
-    vd.textContent = `Tentativas encerradas. O valor usado será carregado na próxima fase.`;
-    document.getElementById(phase + 'Btn').disabled = true;
+  if (attempts[phase] >= MAX_ATT) {
+    document.getElementById(phase+'Btn').disabled = true;
   }
-  document.getElementById(phase + 'Next').style.display = 'block';
+}
+
+function addHistRow(phase, entry) {
+  const tb = document.getElementById(phase+'Hist');
+  const tr = document.createElement('tr');
+  tr.className = 'selectable';
+  tr.dataset.idx = histories[phase].length - 1;
+
+  let cells = '';
+  if (phase === 'kp')
+    cells = `<td>—</td><td>${entry.num}</td><td>${entry.Kp}</td><td>${entry.OS}%</td><td>${entry.Ts}</td><td>${entry.ER}%</td>`;
+  else if (phase === 'ki')
+    cells = `<td>—</td><td>${entry.num}</td><td>${entry.Kp}</td><td>${entry.Ki}</td><td>${entry.OS}%</td><td>${entry.Ts}</td><td>${entry.ER}%</td>`;
+  else
+    cells = `<td>—</td><td>${entry.num}</td><td>${entry.Kp}</td><td>${entry.Ki}</td><td>${entry.Kd}</td><td>${entry.OS}%</td><td>${entry.Ts}</td><td>${entry.ER}%</td>`;
+
+  tr.innerHTML = cells;
+  tr.addEventListener('click', () => selectRow(phase, tr, entry));
+  tb.appendChild(tr);
+}
+
+function selectRow(phase, tr, entry) {
+  // Desmarcar todas as linhas da fase
+  document.querySelectorAll('#'+phase+'Hist tr').forEach(r => r.classList.remove('selected'));
+  tr.classList.add('selected');
+  chosen[phase] = entry;
+
+  // Mostrar painel de confirmação
+  const panel = document.getElementById(phase+'SelectPanel');
+  panel.style.display = 'block';
+
+  let preview = '';
+  if (phase === 'kp') preview = `Kp = ${entry.Kp}`;
+  else if (phase === 'ki') preview = `Kp = ${entry.Kp} | Ki = ${entry.Ki}`;
+  else preview = `Kp = ${entry.Kp} | Ki = ${entry.Ki} | Kd = ${entry.Kd}`;
+
+  document.getElementById(phase+'SelectedPreview').textContent = preview;
+  document.getElementById(phase+'Next').disabled = false;
 }
 
 function nextPhase(next) {
   const current = next === 'ki' ? 'kp' : 'ki';
   phaseDone[current] = true;
-  document.getElementById(current + 'Btn').disabled = true;
-  document.getElementById(current + 'Next').style.display = 'none';
+  document.getElementById(current+'Btn').disabled = true;
 
-  const stepMap = { kp: 0, ki: 1, kd: 2 };
-  document.getElementById('step' + stepMap[current]).classList.remove('active');
-  document.getElementById('step' + stepMap[current]).classList.add('done');
+  const stepMap = { kp:0, ki:1, kd:2 };
+  document.getElementById('step'+stepMap[current]).classList.remove('active');
+  document.getElementById('step'+stepMap[current]).classList.add('done');
 
   if (next === 'ki') {
     document.getElementById('step1').classList.add('active');
     document.getElementById('phaseKi').classList.remove('locked');
-    document.getElementById('kpFixed').textContent = bestGains.kp;
-    document.getElementById('phaseKi').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    document.getElementById('kpFixed').textContent = chosen.kp.Kp;
+    document.getElementById('phaseKi').scrollIntoView({behavior:'smooth',block:'start'});
   } else {
     document.getElementById('step2').classList.add('active');
     document.getElementById('phaseKd').classList.remove('locked');
-    document.getElementById('kpFixed2').textContent = bestGains.kp;
-    document.getElementById('kiFixed').textContent = bestGains.ki;
+    document.getElementById('kpFixed2').textContent = chosen.ki.Kp;
+    document.getElementById('kiFixed').textContent  = chosen.ki.Ki;
     phaseDone['ki'] = true;
     document.getElementById('kiBtn').disabled = true;
-    document.getElementById('kiNext').style.display = 'none';
-    document.getElementById('phaseKd').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    document.getElementById('phaseKd').scrollIntoView({behavior:'smooth',block:'start'});
   }
 }
 
 function finalize() {
   phaseDone['kd'] = true;
   document.getElementById('kdBtn').disabled = true;
-  document.getElementById('kdNext').style.display = 'none';
   document.getElementById('step2').classList.remove('active');
   document.getElementById('step2').classList.add('done');
   document.getElementById('step3').classList.add('done');
 
-  document.getElementById('finalKp').textContent = bestGains.kp;
-  document.getElementById('finalKi').textContent = bestGains.ki;
-  document.getElementById('finalKd').textContent = bestGains.kd;
+  document.getElementById('finalKp').textContent = chosen.kd.Kp;
+  document.getElementById('finalKi').textContent = chosen.kd.Ki;
+  document.getElementById('finalKd').textContent = chosen.kd.Kd;
   document.getElementById('phaseFinal').classList.remove('locked');
-  document.getElementById('phaseFinal').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  document.getElementById('phaseFinal').scrollIntoView({behavior:'smooth',block:'start'});
   sendToSheets();
 }
 
 function sendToSheets() {
   if (APPS_SCRIPT_URL === 'COLE_AQUI_A_URL_DO_APPS_SCRIPT_EXPLORADOR') {
-    document.getElementById('finalSent').style.display = 'flex'; return;
+    document.getElementById('finalSent').style.display='flex'; return;
   }
   const payload = {
     nome: studentName,
     timestamp: new Date().toLocaleString('pt-BR'),
-    melhorKp: bestGains.kp, melhorKi: bestGains.ki, melhorKd: bestGains.kd,
+    escolhaKp: chosen.kp, escolhaKi: chosen.ki, escolhaKd: chosen.kd,
     faseKp: histories.kp, faseKi: histories.ki, faseKd: histories.kd
   };
   fetch(APPS_SCRIPT_URL, {
-    method: 'POST', mode: 'no-cors',
-    headers: { 'Content-Type': 'application/json' },
+    method:'POST', mode:'no-cors',
+    headers:{'Content-Type':'application/json'},
     body: JSON.stringify(payload)
-  }).then(() => {
-    document.getElementById('finalSent').style.display = 'flex';
-  }).catch(() => {
+  }).then(()=>{
+    document.getElementById('finalSent').style.display='flex';
+  }).catch(()=>{
     const m = document.getElementById('finalSent');
-    m.textContent = '⚠ Erro ao enviar. Anote os ganhos e informe o professor.';
-    m.style.display = 'flex';
+    m.textContent='⚠ Erro ao enviar. Anote os ganhos e informe o professor.';
+    m.style.display='flex';
   });
 }
 </script>
