@@ -116,6 +116,12 @@
   .verdict.info{background:#eff6ff;border:1px solid #bfdbfe;color:var(--accent)}
   .verdict.sent{background:#eff6ff;border:1px solid #bfdbfe;color:var(--accent);margin-top:8px}
 
+  /* Aviso de seleção obrigatória */
+  .must-select{background:#fff7ed;border:2px solid #fb923c;border-radius:10px;padding:14px 16px;margin-top:1rem;display:none;align-items:flex-start;gap:10px}
+  .must-select-icon{font-size:20px;flex-shrink:0;line-height:1}
+  .must-select-text{font-size:13px;color:#9a3412;line-height:1.5}
+  .must-select-text strong{display:block;font-size:14px;margin-bottom:3px;color:#7c2d12}
+
   .summary-box{background:var(--green-bg);border:1px solid var(--green-border);border-radius:12px;padding:1.5rem;margin-bottom:1.5rem;text-align:center}
   .summary-box h2{font-size:20px;font-weight:600;color:var(--green);margin-bottom:6px}
   .summary-box p{font-size:14px;color:var(--muted)}
@@ -205,6 +211,15 @@
         <div class="metric-card"><div class="metric-label">Erro em regime</div><div class="metric-val" id="kp-er">—</div></div>
       </div>
 
+      <!-- Aviso ao esgotar tentativas -->
+      <div class="must-select" id="kpMustSelect">
+        <div class="must-select-icon">⚠️</div>
+        <div class="must-select-text">
+          <strong>Tentativas encerradas — seleção obrigatória</strong>
+          Você usou todas as 5 tentativas desta fase. Analise a tabela abaixo, clique na linha com o melhor resultado e avance para a Fase 2.
+        </div>
+      </div>
+
       <!-- Tabela + seleção -->
       <div class="select-title">Histórico de tentativas — clique em uma linha para selecioná-la</div>
       <div class="select-hint">Analise os resultados e escolha o Kp que levará para a Fase 2.</div>
@@ -258,6 +273,15 @@
         <div class="metric-card"><div class="metric-label">Erro em regime</div><div class="metric-val" id="ki-er">—</div></div>
       </div>
 
+      <!-- Aviso ao esgotar tentativas -->
+      <div class="must-select" id="kiMustSelect">
+        <div class="must-select-icon">⚠️</div>
+        <div class="must-select-text">
+          <strong>Tentativas encerradas — seleção obrigatória</strong>
+          Você usou todas as 5 tentativas desta fase. Analise a tabela abaixo, clique na linha com o melhor resultado e avance para a Fase 3.
+        </div>
+      </div>
+
       <div class="select-title">Histórico de tentativas — clique em uma linha para selecioná-la</div>
       <div class="select-hint">Escolha o par Kp+Ki que levará para a Fase 3.</div>
       <div class="hist-wrap">
@@ -308,6 +332,15 @@
         <div class="metric-card"><div class="metric-label">Overshoot</div><div class="metric-val" id="kd-os">—</div></div>
         <div class="metric-card"><div class="metric-label">Tempo de acomodação</div><div class="metric-val" id="kd-ts">—</div></div>
         <div class="metric-card"><div class="metric-label">Erro em regime</div><div class="metric-val" id="kd-er">—</div></div>
+      </div>
+
+      <!-- Aviso ao esgotar tentativas -->
+      <div class="must-select" id="kdMustSelect">
+        <div class="must-select-icon">⚠️</div>
+        <div class="must-select-text">
+          <strong>Tentativas encerradas — seleção obrigatória</strong>
+          Você usou todas as 5 tentativas desta fase. Analise a tabela abaixo, clique na linha com o melhor conjunto de ganhos e conclua a exploração.
+        </div>
       </div>
 
       <div class="select-title">Histórico de tentativas — clique em uma linha para selecioná-la</div>
@@ -453,6 +486,9 @@ function simPhase(phase) {
 
   if (attempts[phase] >= MAX_ATT) {
     document.getElementById(phase+'Btn').disabled = true;
+    const aviso = document.getElementById(phase+'MustSelect');
+    aviso.style.display = 'flex';
+    aviso.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }
 }
 
